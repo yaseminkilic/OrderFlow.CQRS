@@ -1,0 +1,156 @@
+@page "/orders"
+@rendermode InteractiveServer
+@inject OrderService OrderService
+
+<PageTitle>Siparisler</PageTitle>
+
+<h2>Siparis Listesi</h2>
+
+<div class="mb-3">
+    <a href="orders/create" class="btn btn-primary">Yeni Siparis</a>
+    <button class="btn btn-outline-secondary ms-2" @onclick="LoadOrders">Yenile</button>
+</div>
+
+@if (_loading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yukleniyor...</span>
+    </div>
+}
+else if (_error != null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_orders.Count == 0)
+{
+    <div class="alert alert-info">Henuz siparis bulunmuyor.</div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Siparis No</th>
+                    <th>Musteri</th>
+                    <th>E-posta</th>
+                    <th>Toplam</th>
+                    <th>Durum</th>
+                    <th>Odeme</th>
+                    <th>Tarih</th>
+                    <th>Islemler</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in _orders)
+                {
+                    <tr>
+                        <td><strong>@order.OrderNumber</strong></td>
+                        <td>@order.CustomerName</td>
+                        <td>@order.CustomerEmail</td>
+                        <td>@order.TotalAmount.ToString("C2")</td>
+                        <td>
+                            <span class="badge @GetStatusBadgeClass(order.Status)">
+                                @GetStatusText(order.Status)
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge @GetPaymentBadgeClass(order.PaymentStatus)">
+                                @GetPaymentStatusText(order.PaymentStatus)
+                            </span>
+                        </td>
+                        <td>@order.CreatedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>
+                            <a href="@($"orders/{order.Id}")" class="btn btn-sm btn-outline-primary">Detay</a>
+                            <button class="btn btn-sm btn-outline-danger ms-1" @onclick="() => DeleteOrder(order.Id)">Sil</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<OrderDto> _orders = new();
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _orders = await OrderService.GetOrdersAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Siparisler yuklenirken hata olustu: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task DeleteOrder(Guid id)
+    {
+        try
+        {
+            await OrderService.DeleteOrderAsync(id);
+            await LoadOrders();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Siparis silinirken hata olustu: {ex.Message}";
+        }
+    }
+
+    private static string GetStatusBadgeClass(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "bg-warning text-dark",
+        OrderStatus.Confirmed => "bg-info",
+        OrderStatus.Processing => "bg-primary",
+        OrderStatus.Shipped => "bg-secondary",
+        OrderStatus.Delivered => "bg-success",
+        OrderStatus.Cancelled => "bg-danger",
+        OrderStatus.Refunded => "bg-dark",
+        _ => "bg-secondary"
+    };
+
+    private static string GetStatusText(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "Beklemede",
+        OrderStatus.Confirmed => "Onaylandi",
+        OrderStatus.Processing => "Hazirlaniyor",
+        OrderStatus.Shipped => "Kargoda",
+        OrderStatus.Delivered => "Teslim Edildi",
+        OrderStatus.Cancelled => "Iptal Edildi",
+        OrderStatus.Refunded => "Iade Edildi",
+        _ => status.ToString()
+    };
+
+    private static string GetPaymentBadgeClass(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Pending => "bg-warning text-dark",
+        PaymentStatus.Paid => "bg-success",
+        PaymentStatus.Failed => "bg-danger",
+        PaymentStatus.Refunded => "bg-dark",
+        _ => "bg-secondary"
+    };
+
+    private static string GetPaymentStatusText(PaymentStatus status) => status switch
+    {
+        PaymentStatus.Pending => "Beklemede",
+        PaymentStatus.Paid => "Odendi",
+        PaymentStatus.Failed => "Basarisiz",
+        PaymentStatus.Refunded => "Iade Edildi",
+        _ => status.ToString()
+    };
+}

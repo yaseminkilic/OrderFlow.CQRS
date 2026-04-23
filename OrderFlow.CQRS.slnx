@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OrderManagement.API/OrderFlow.CQRS.API.csproj" />
+    <Project Path="src/OrderManagement.Application/OrderFlow.CQRS.Application.csproj" />
+    <Project Path="src/OrderManagement.Blazor/OrderFlow.CQRS.Blazor.csproj" />
+    <Project Path="src/OrderManagement.Domain/OrderFlow.CQRS.Domain.csproj" />
+    <Project Path="src/OrderManagement.Infrastructure/OrderFlow.CQRS.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OrderManagement.API.Tests/OrderFlow.CQRS.API.Tests.csproj" />
+    <Project Path="tests/OrderManagement.Application.Tests/OrderFlow.CQRS.Application.Tests.csproj" />
+    <Project Path="tests/OrderManagement.Domain.Tests/OrderFlow.CQRS.Domain.Tests.csproj" />
+    <Project Path="tests/OrderManagement.Infrastructure.Tests/OrderFlow.CQRS.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>

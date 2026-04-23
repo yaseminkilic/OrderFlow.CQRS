@@ -1,0 +1,142 @@
+@page "/orders/{Id:guid}"
+@rendermode InteractiveServer
+@inject OrderService OrderService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Siparis Detayi</PageTitle>
+
+@if (_loading)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Yukleniyor...</span>
+    </div>
+}
+else if (_error != null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_order != null)
+{
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Siparis: @_order.OrderNumber</h2>
+        <a href="orders" class="btn btn-outline-secondary">Geri Don</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Musteri Bilgileri</strong></div>
+                <div class="card-body">
+                    <p><strong>Ad:</strong> @_order.CustomerName</p>
+                    <p><strong>E-posta:</strong> @_order.CustomerEmail</p>
+                    <p><strong>Adres:</strong> @_order.ShippingAddress</p>
+                    @if (!string.IsNullOrEmpty(_order.Notes))
+                    {
+                        <p><strong>Notlar:</strong> @_order.Notes</p>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-header"><strong>Siparis Durumu</strong></div>
+                <div class="card-body">
+                    <p><strong>Tarih:</strong> @_order.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                    <p><strong>Toplam:</strong> @_order.TotalAmount.ToString("C2")</p>
+                    <p>
+                        <strong>Durum:</strong>
+                        <select class="form-select d-inline-block w-auto ms-2" value="@((int)_order.Status)" @onchange="OnStatusChanged">
+                            @foreach (OrderStatus status in Enum.GetValues<OrderStatus>())
+                            {
+                                <option value="@((int)status)">@status</option>
+                            }
+                        </select>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header"><strong>Siparis Kalemleri</strong></div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Urun</th>
+                        <th>Kod</th>
+                        <th>Miktar</th>
+                        <th>Birim Fiyat</th>
+                        <th>Toplam</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in _order.Items)
+                    {
+                        <tr>
+                            <td>@item.ProductName</td>
+                            <td>@item.ProductCode</td>
+                            <td>@item.Quantity</td>
+                            <td>@item.UnitPrice.ToString("C2")</td>
+                            <td><strong>@item.TotalPrice.ToString("C2")</strong></td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Genel Toplam:</strong></td>
+                        <td><strong>@_order.TotalAmount.ToString("C2")</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private OrderDto? _order;
+    private bool _loading = true;
+    private string? _error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadOrder();
+    }
+
+    private async Task LoadOrder()
+    {
+        _loading = true;
+        try
+        {
+            _order = await OrderService.GetOrderByIdAsync(Id);
+            if (_order == null)
+                _error = "Siparis bulunamadi.";
+        }
+        catch (Exception ex)
+        {
+            _error = $"Siparis yuklenirken hata: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnStatusChanged(ChangeEventArgs e)
+    {
+        if (_order == null || e.Value == null) return;
+
+        try
+        {
+            var newStatus = (OrderStatus)int.Parse(e.Value.ToString()!);
+            _order = await OrderService.UpdateOrderStatusAsync(_order.Id, newStatus);
+        }
+        catch (Exception ex)
+        {
+            _error = $"Durum guncellenirken hata: {ex.Message}";
+        }
+    }
+}

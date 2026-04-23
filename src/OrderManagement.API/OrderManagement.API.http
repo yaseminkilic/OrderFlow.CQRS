@@ -1,0 +1,6 @@
+@OrderFlow.CQRS.API_HostAddress = http://localhost:7200
+
+GET {{OrderFlow.CQRS.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
