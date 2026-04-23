@@ -1,4 +1,4 @@
-# Order Management System
+# OrderFlow.CQRS
 
 A full-stack order management application built with **.NET 8**, following **Clean Architecture** principles with **CQRS**, **RabbitMQ** messaging, **Blazor Server** frontend, and structured logging via **Serilog**.
 
