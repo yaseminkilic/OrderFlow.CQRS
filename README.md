@@ -173,13 +173,7 @@ Payment status is tracked independently: `Pending`, `Paid`, `Failed`, `Refunded`
 
 | Document | Description |
 |---|---|
-| [docs/architecture.md](docs/architecture.md) | Full architectural documentation |
-| [docs/api-overview.md](docs/api-overview.md) | API endpoint reference |
-| [docs/messaging.md](docs/messaging.md) | RabbitMQ messaging architecture |
-| [docs/development-workflow.md](docs/development-workflow.md) | Build commands, conventions, troubleshooting |
-| [docs/deployment.md](docs/deployment.md) | Deployment guide and production checklist |
-| [docs/onboarding.md](docs/onboarding.md) | New developer onboarding guide |
-| [docs/TECHNICAL_DOCUMENTATION.md](docs/TECHNICAL_DOCUMENTATION.md) | Comprehensive technical reference |
+| Comming Soon |
 
 ---
 
