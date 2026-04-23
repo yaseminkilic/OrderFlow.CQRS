@@ -3,6 +3,7 @@
 docs/
 [Mm]igrations/
 .env
+PRIVATE_*.md
 
 ## .NET
 bin/
